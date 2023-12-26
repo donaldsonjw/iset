@@ -1,0 +1,6 @@
+(declare-library! 'iset
+   :version "@VERSION@"
+   :srfi '(iset)
+   :basename "iset"
+   :module-eval 'iset_make_lib)
+
