@@ -1,0 +1,301 @@
+* iset : Integer Sets & Bit Vectors
+
+** Description
+   This is a port of Alex Shinn's [[https://api.call-cc.org/5/doc/iset][iset]] library (i.e., egg) from [[http://www.call-cc.org/][Chicken
+   Scheme]] to [[https://www-sop.inria.fr/mimosa/fp/Bigloo/][Bigloo]]. It includes bit vectors and integer sets. The
+   test suite depends on [[https://github.com/donaldsonjw/srfi64][SRFI 64]] and will need to be installed before
+   running. 
+  
+** Building
+  Both the bigloo native and jvm backends are supported. To build,
+  execute:
+    #+begin_src shell
+  ./configure --prefix=<installation path prefix>; make
+#+end_src
+  where =<installation path prefix>= is the desired installation path
+  prefix (e.g, =/usr/local=). You usually want the path prefix to match
+  that used by Bigloo itself.
+
+** Installation
+  To install the library, execute:
+#+begin_src shell
+  make install
+#+end_src 
+
+** Tests
+To run the tests execute:
+
+  #+begin_src shell
+  make test
+#+end_src
+
+** Documentaton
+
+   The following is copied from Chicken's iset documentation.
+
+
+*** Bit Vectors
+Bit-vectors provide an abstract interface to bitwise operations typically done with integers. They may in fact be implemented as integers on implementations with bignums, or they may be implemented by other means such as vectors which may be more efficient. These vectors are meant to be used as flags and sets, not integer values, and thus are operations are ones-complement (there are no negative bit-vectors).
+
+**** Creating bit-vectors
+
+*make-bit-vector* size
+
+    A 'zero' bit-vector, with a hint that we wish to use SIZE bits.
+
+*make-bit-vector* size #t
+
+    Same as above but initialize the all bit elements to #t (= the integer 2^SIZE-1)
+
+*integer->bit-vector* n
+
+    Create a bit-vector with bits initialized to the corresponds bits in fixnum N
+
+*bit-vector-copy* bv
+
+    Make a copy of the bit-vector BV
+
+**** Bit-vector predicates
+
+*bit-vector?* obj
+
+    #t iff OBJ is a valid bit-vector, which is not necessarily a disjoint type
+
+*bit-vector-empty?* bv
+
+    #t iff BV has no bits set (the bit-vector equivalent of the ZERO? procedure)
+
+*bit-vector-full?* bv to
+
+    #t iff BV has all bits lower than TO set (the low end is 2^i-1)
+
+    The individual bits in the vector are accessed and set as boolean values:
+
+**** Accessing bit-vector elements
+
+*bit-vector-ref* bv i
+
+    #t if the I-th bit in BV is set, else #f
+
+*bit-vector-set* bv i x
+
+    Return a new copy of BV with the I-th bit set to boolean x (off iff X is #f)
+
+*bit-vector-set!* bv i x
+
+    In-place update version of the above, is allowed but not required to mutate BV
+
+**** Bitwise operations on bit-vectors
+
+The following procedures are direct analogues of the corresponding SRFI-33 bitwise operations:
+
+*bit-vector-length* bv
+
+    integer-length: the index of the largest bit set in BV
+
+*bit-vector-count* bv
+
+    bit-count: the number of set bits in BV
+
+*bit-vector-shift* bv n
+
+    arithmetic-shift
+
+*bit-vector-and* bv ...
+
+    bitwise-and
+
+*bit-vector-ior* bv ...
+
+    bitwise-ior
+
+*bit-vector-xor* bv ...
+
+    bitwise-xor
+
+*bit-vector-eqv* bv ...
+
+    bitwise-eqv
+
+*bit-vector-nand* bv ...
+
+    bitwise-nand
+
+*bit-vector-nor* bv ...
+
+    bitwise-nor
+
+The following in-place update equivalents are also available, which are allowed, but not required, to mutate their first argument only:
+
+*bit-vector-shift!* bv n
+*bit-vector-and!* bv ...
+*bit-vector-ior!* bv ...
+*bit-vector-xor!* bv ...
+*bit-vector-eqv!* bv ...
+*bit-vector-nand!* bv ...
+*bit-vector-nor!* bv ...
+
+*** Integer sets
+
+An integer set is a set of exact integers optimized for minimal space usage and fast membership lookup. General set operations are provided based on the character set operations found in SRFI-14.
+
+**** Creating isets
+
+*make-iset*
+
+    An empty integer set.
+
+*make-iset* n
+
+    A set of the single integer N.
+
+*make-iset* n m
+
+    A set of the range of all integers from N-M inclusive.
+
+**** SRFI-14 analogues
+
+The following procedures are provided as direct analogs of the SRFI-14 procedures, accepting and returning isets and integers in place of char-sets and characters:
+
+*iset-copy* is
+
+    A new copy of IS
+
+*iset* n ...
+
+    An iset containing the elements N...
+
+*list->iset* ls #!optional base-is
+
+    An iset containing all the integers in list LS, union BASE-IS if provided
+
+*list->iset!* ls base-is
+
+    Same as above, allowed but not required to modify base-is
+
+*iset-size* is
+
+    Return the # of elements in IS
+
+*iset-contains?* is n
+
+    Test N for membership in IS
+
+*iset->list* is
+
+    Returns a list of all integers in IS
+
+*iset-any* pred is
+
+    Apply PRED to every element of IS, returning the first value returned by PRED that is not #f, if any (order unspecified)
+
+*iset-every* pred is
+
+    Returns #t if every element of IS satisfies the predicate PRED (order unspecified)
+
+*iset?* obj
+
+    #t iff obj is an integer set.
+
+*iset=* is ...
+
+    #t iff all arguments are equivalent integer sets.
+
+*iset<=* is ...
+
+    #t iff the arguments are monotonically increasing sets.
+
+*iset>=* is ...
+
+    #t iff the arguments are monotonically decreasing sets.
+
+*iset-fold* kons knil is
+
+    char-set-fold
+
+*iset-unfold* f p g #!optional base-is
+
+    char-set-unfold
+
+*iset-unfold!* f p g base-is
+
+    char-set-unfold!
+
+*iset-for-each* proc is
+
+    char-set-for-each
+
+*iset-map* proc is
+
+    char-set-map
+
+*iset-filter* pred is #!optional bas-is
+
+    char-set-filter
+
+*iset-filter!* pred is base-is
+
+    char-set-filter!
+
+*iset-cursor* iset
+*iset-ref* iset cursor
+*iset-cursor-next* iset cursor
+*end-of-iset?* iset
+
+    Cursor-based traversal of isets.
+
+*iset-adjoin* is n ...
+
+    char-set-adjoin
+
+*iset-delete* is n ...
+
+    char-set-delete
+
+*iset-adjoin!* is n ...
+
+    char-set-adjoin!
+
+*iset-delete!* is n ...
+
+    char-set-delete!
+
+*iset-union* is1 ...
+
+    char-set-union
+
+*iset-intersection* is1 ...
+
+    char-set-intersection
+
+*iset-differenc* e is1 is2 ...
+
+    char-set-difference
+
+*iset-xor* is1 ...
+
+    char-set-xor
+
+*iset-diff+intersection* is1 is2 ...
+
+    char-set-diff+intersection
+
+*iset-union!* is1 ...
+
+    char-set-union!
+
+*iset-intersection!* is1 ...
+
+    char-set-intersection!
+
+*iset-difference!* is1 is2 ...
+
+    char-set-difference!
+
+*iset-xor!* is1 ...
+
+    char-set-xor!
+
+*iset-diff+intersection!* is1 is2 ...
+
+    char-set-diff+intersection!
